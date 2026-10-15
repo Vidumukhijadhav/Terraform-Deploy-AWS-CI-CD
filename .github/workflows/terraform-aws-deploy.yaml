@@ -1,29 +1,49 @@
+
 name: Terraform-AWS-Deploy
-on: 
+
+on:
   push:
     branches:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   terraform:
     name: Terraform Plan and Apply
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::636710162452:role/GitHubActionsDeployRole
+          aws-region: us-west-2
+          role-session-name: GitHubActionsTerraform
+
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.16.6
+          terraform_version: "1.10.5"
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform -chdir=env/dev init
+
+      - name: Terraform Validate
+        run: terraform -chdir=env/dev validate
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform -chdir=env/dev plan -out=tfplan
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve
+        run: terraform -chdir=env/dev apply -auto-approve tfplan
