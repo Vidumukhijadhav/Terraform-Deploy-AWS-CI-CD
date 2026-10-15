@@ -22,6 +22,11 @@ jobs:
   terraform:
     name: Terraform ${{ github.event.inputs.action || 'apply' }}
     runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 60
+    concurrency:
+      group: terraform-env-dev
+      cancel-in-progress: false
 
     steps:
       - name: Checkout Repository
@@ -62,4 +67,4 @@ jobs:
 
       - name: Terraform Destroy
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
-        run: terraform -chdir=env/dev destroy -auto-approve tfplan-destroy
+        run: terraform -chdir=env/dev apply -auto-approve tfplan-destroy
