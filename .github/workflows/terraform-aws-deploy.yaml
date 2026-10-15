@@ -23,10 +23,13 @@ jobs:
     name: Terraform ${{ github.event.inputs.action || 'apply' }}
     runs-on: ubuntu-latest
     environment: production
-    timeout-minutes: 60
+    timeout-minutes: 30
     concurrency:
       group: terraform-env-dev
       cancel-in-progress: false
+    env:
+      TF_INPUT: "false"
+      TF_IN_AUTOMATION: "true"
 
     steps:
       - name: Checkout Repository
@@ -48,23 +51,24 @@ jobs:
           terraform_version: "1.10.5"
 
       - name: Terraform Init
-        run: terraform -chdir=env/dev init
+        timeout-minutes: 5
+        run: terraform -chdir=env/dev init -input=false -reconfigure
 
       - name: Terraform Validate
         run: terraform -chdir=env/dev validate
 
       - name: Terraform Plan
         if: github.event_name == 'push' || github.event.inputs.action == 'apply'
-        run: terraform -chdir=env/dev plan -out=tfplan
+        run: terraform -chdir=env/dev plan -input=false -out=tfplan
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.action == 'apply')
-        run: terraform -chdir=env/dev apply -auto-approve tfplan
+        run: terraform -chdir=env/dev apply -input=false -auto-approve tfplan
 
       - name: Terraform Plan Destroy
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
-        run: terraform -chdir=env/dev plan -destroy -out=tfplan-destroy
+        run: terraform -chdir=env/dev plan -destroy -input=false -out=tfplan-destroy
 
       - name: Terraform Destroy
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
-        run: terraform -chdir=env/dev apply -auto-approve tfplan-destroy
+        run: terraform -chdir=env/dev apply -input=false -auto-approve tfplan-destroy
