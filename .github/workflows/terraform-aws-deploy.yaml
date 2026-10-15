@@ -62,4 +62,4 @@ jobs:
 
       - name: Terraform Destroy
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
-        run: terraform -chdir=env/dev apply -auto-approve tfplan-destroy
+        run: terraform -chdir=env/dev destroy -auto-approve tfplan-destroy
