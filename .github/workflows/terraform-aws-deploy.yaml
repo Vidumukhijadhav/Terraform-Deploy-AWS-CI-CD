@@ -5,6 +5,14 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to run"
+        type: choice
+        options:
+          - apply
+          - destroy
+        default: apply
 
 permissions:
   contents: read
@@ -12,18 +20,12 @@ permissions:
 
 jobs:
   terraform:
-    name: Terraform Plan and Apply
+    name: Terraform ${{ github.event.inputs.action || 'apply' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Show OIDC claims
-        run: |
-          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
-          python3 -c "import sys,json,base64; p=sys.argv[1].split('.')[1]; p+='='*(-len(p)%4); c=json.loads(base64.urlsafe_b64decode(p)); print({k:c[k] for k in ('sub','aud','repository','repository_owner')})" "$TOKEN"
 
       - name: Configure AWS Credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
@@ -47,8 +49,17 @@ jobs:
         run: terraform -chdir=env/dev validate
 
       - name: Terraform Plan
+        if: github.event_name == 'push' || github.event.inputs.action == 'apply'
         run: terraform -chdir=env/dev plan -out=tfplan
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.action == 'apply')
         run: terraform -chdir=env/dev apply -auto-approve tfplan
+
+      - name: Terraform Plan Destroy
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        run: terraform -chdir=env/dev plan -destroy -out=tfplan-destroy
+
+      - name: Terraform Destroy
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        run: terraform -chdir=env/dev apply -auto-approve tfplan-destroy
