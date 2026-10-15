@@ -53,8 +53,11 @@ jobs:
       - name: Clean stale local Terraform files
         run: |
           echo "Local state files found in checkout (should be empty):"
-          ls -la env/dev/.terraform env/dev/terraform.tfstate* 2>/dev/null || echo "none"
-          rm -rf env/dev/.terraform env/dev/terraform.tfstate env/dev/terraform.tfstate.backup
+          ls -laR env/dev/.terraform env/dev/terraform.tfstate* 2>&1 || true
+          rm -rf env/dev/.terraform \
+                 env/dev/terraform.tfstate \
+                 env/dev/terraform.tfstate.backup \
+                 env/dev/terraform.tfstate.d
 
       - name: Terraform Init
         timeout-minutes: 5
