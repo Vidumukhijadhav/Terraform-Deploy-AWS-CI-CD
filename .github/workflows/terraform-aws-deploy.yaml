@@ -19,6 +19,29 @@ permissions:
   id-token: write
 
 jobs:
+  tfsec:
+    name: tfsec code security scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Set up tfsec
+        uses: aquasecurity/tfsec-action@v1
+        with:
+          working_directory: env/dev
+          additional_args: >
+            --concise-output
+            --format sarif
+            --out tfsec.sarif
+            --soft-fail-severities LOW,MEDIUM
+
+      - name: Upload tfsec SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: tfsec.sarif
+
   terraform:
     name: Terraform ${{ github.event.inputs.action || 'apply' }}
     runs-on: ubuntu-latest
