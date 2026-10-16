@@ -20,6 +20,8 @@ permissions:
   contents: read
 
 jobs:
+  
+   
   tfsec:
     name: Terraform Security Scan
     runs-on: ubuntu-latest
@@ -31,25 +33,33 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up tfsec
-        uses: aquasecurity/tfsec-action@v1.0.0
-        with:
-          working_directory: env/dev
-          format: sarif
-          soft_fail: true
-          additional_args: >
-            --concise-output
-            --out ../../tfsec.sarif
+      - name: Install tfsec
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSfL \
+            https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh \
+            | bash -s -- -b /usr/local/bin
 
-      - name: Locate SARIF Report
-        if: always()
-        run: find . -name 'tfsec.sarif' -type f
+      - name: Run tfsec
+        shell: bash
+        run: |
+          set -euo pipefail
+          tfsec env/dev \
+            --concise-output \
+            --format sarif \
+            --out tfsec.sarif \
+            --soft-fail
+
+          test -s tfsec.sarif
 
       - name: Upload tfsec SARIF File
-        if: always()
+        if: always() && hashFiles('tfsec.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: tfsec.sarif
+
+
 
   terraform:
     name: Terraform ${{ github.event.inputs.action || 'apply' }}
