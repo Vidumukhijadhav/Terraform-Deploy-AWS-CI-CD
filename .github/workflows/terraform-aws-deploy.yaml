@@ -1,4 +1,3 @@
-
 name: Terraform-AWS-Deploy
 
 on:
@@ -20,8 +19,6 @@ permissions:
   contents: read
 
 jobs:
-  
-   
   tfsec:
     name: Terraform Security Scan
     runs-on: ubuntu-latest
@@ -41,25 +38,50 @@ jobs:
             https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh \
             | bash -s -- -b /usr/local/bin
 
-      - name: Run tfsec
+      - name: Run tfsec (SARIF)
         shell: bash
         run: |
           set -euo pipefail
+          TFVARS_ARGS=()
+          if [ -f env/dev/terraform.tfvars ]; then
+            TFVARS_ARGS=(--tfvars-file env/dev/terraform.tfvars)
+          fi
           tfsec env/dev \
+            "${TFVARS_ARGS[@]}" \
             --concise-output \
             --format sarif \
             --out tfsec.sarif \
             --soft-fail
-
           test -s tfsec.sarif
 
-      - name: Upload tfsec SARIF File
+      - name: Upload tfsec SARIF File (Security tab)
         if: always() && hashFiles('tfsec.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: tfsec.sarif
 
+      - name: Upload tfsec report as artifact (downloadable)
+        if: always() && hashFiles('tfsec.sarif') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfsec-report
+          path: tfsec.sarif
+          retention-days: 14
 
+      - name: Show tfsec results in job summary
+        if: always()
+        shell: bash
+        run: |
+          TFVARS_ARGS=()
+          if [ -f env/dev/terraform.tfvars ]; then
+            TFVARS_ARGS=(--tfvars-file env/dev/terraform.tfvars)
+          fi
+          {
+            echo '### tfsec results'
+            echo '```'
+            tfsec env/dev "${TFVARS_ARGS[@]}" --no-colour --soft-fail || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   terraform:
     name: Terraform ${{ github.event.inputs.action || 'apply' }}
