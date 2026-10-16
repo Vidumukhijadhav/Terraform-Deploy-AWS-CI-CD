@@ -89,8 +89,14 @@ jobs:
         with:
           terraform_version: "1.10.5"
 
+      - name: Configure AWS Credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::636710162452:role/GitHubActionsDeployRoleV2
+          aws-region: us-west-2
+          role-session-name: GitHubActionsTerraform
+
       - name: Terraform Init
-        timeout-minutes: 5
         run: terraform -chdir=env/dev init -input=false -reconfigure
 
       - name: Terraform Format Check
@@ -98,13 +104,6 @@ jobs:
 
       - name: Terraform Validate
         run: terraform -chdir=env/dev validate
-
-      - name: Configure AWS Credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::636710162452:role/GitHubActionsDeployRoleV2
-          aws-region: us-west-2
-          role-session-name: GitHubActionsTerraform
 
       - name: Verify AWS Identity
         run: aws sts get-caller-identity
