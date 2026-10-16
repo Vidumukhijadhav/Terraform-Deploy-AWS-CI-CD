@@ -39,7 +39,7 @@ jobs:
           soft_fail: true
           additional_args: >
             --concise-output
-            --out tfsec.sarif
+            --out ../../tfsec.sarif
 
       - name: Locate SARIF Report
         if: always()
