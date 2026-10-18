@@ -1,0 +1,10 @@
+Dockerfile
+.dockerignore
+README.md
+deploy/
+data/
+*.db
+*.db-*
+__pycache__/
+*.pyc
+.git

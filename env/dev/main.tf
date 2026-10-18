@@ -21,7 +21,7 @@ module "compute" {
 
   vpc_id = module.networking.vpc_id
 
-  subnet_id = module.networking.private_subnet_ids[0]
+  subnet_id = module.networking.public_subnet_ids[0]
 
   ami_id        = var.ami_id
   instance_type = var.instance_type

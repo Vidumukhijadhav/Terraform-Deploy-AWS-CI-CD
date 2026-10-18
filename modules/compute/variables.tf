@@ -41,3 +41,9 @@ variable "ssh_cidr" {
   description = "CIDR allowed for SSH"
   type        = string
 }
+
+variable "http_cidr" {
+  description = "CIDR allowed to reach the app on HTTP (80)"
+  type        = string
+  default     = "0.0.0.0/0"
+}
