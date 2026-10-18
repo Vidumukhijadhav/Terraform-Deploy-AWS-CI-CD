@@ -3,16 +3,19 @@
 A lightweight todo app with a glassmorphism UI, light and dark themes, priorities, due dates, search, filters, and a progress ring.
 
 - **Accounts:** sign up and log in with a username and password. Each user only sees their own tasks.
+- **3D (Three.js):** glossy floating shapes in the background that follow your mouse and scroll, a 3D Taski who turns to look at your cursor, 3D confetti when you finish a task (and a confetti storm when you finish them all), and cards that tilt in 3D on hover. Browsers without WebGL get the 2D version.
 - **Motivation:** a quote of the day (with a 🔄 button for a new one), emoji everywhere, and **Taski**, an animated cartoon mascot that waves, cheers when you complete a task, and throws a party when everything is done 🎉.
 
 - **Backend:** Python 3 standard library only (`http.server` + `sqlite3`). There is nothing to `pip install`.
-- **Frontend:** Vanilla HTML/CSS/JS served by the same process.
+- **Frontend:** Vanilla HTML/CSS/JS served by the same process. Three.js r186 is vendored (minified) in `static/vendor/three/` because the Content-Security-Policy only allows scripts from the app itself. There is no build step.
 - **Storage:** SQLite file (default `/var/lib/todo-app/todos.db` when installed as a service).
 
 ```
 app/
 ├── server.py                 # HTTP server + JSON API
 ├── static/                   # index.html, style.css, app.js, quotes.js
+│   ├── scene3d.js            # Three.js scene: background, 3D mascot, confetti, card tilt
+│   └── vendor/three/         # three.module.js + three.core.js (MIT, see VERSION)
 └── deploy/
     ├── install.sh            # one-shot installer (systemd)
     └── todo-app.service      # systemd unit (runs as non-root on port 80)

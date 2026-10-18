@@ -105,7 +105,13 @@ h1 {
 
 .header-right { display: flex; align-items: center; gap: 14px; }
 
-.progress { position: relative; width: 72px; height: 72px; }
+.progress {
+  position: relative; width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
 .progress svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .progress circle { fill: none; stroke-width: 10; }
 .progress .track { stroke: var(--border); }
@@ -497,6 +503,25 @@ h1 {
     transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(0.6);
     opacity: 0;
   }
+}
+
+/* ---------- 3D layer (scene3d.js) ---------- */
+.scene-bg, .scene-confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; display: block; }
+.scene-bg { z-index: -1; }
+.scene-confetti { z-index: 20; }
+.has-3d .floaties { display: none; }
+.mascot-slot.is-3d > svg { display: none; }
+.mascot-3d { display: block; width: 100%; aspect-ratio: 120 / 130; }
+.stat, .quote-card, .auth-card { transition: transform 0.2s ease-out, box-shadow 0.2s ease; transform-style: preserve-3d; }
+.has-3d .stat:hover, .has-3d .quote-card:hover { box-shadow: var(--shadow); }
+
+/* Extruded 3D look for the title */
+h1 {
+  filter:
+    drop-shadow(0 1px 0 #7d6cf0)
+    drop-shadow(0 1px 0 #6c5ce7)
+    drop-shadow(0 1px 0 #5b4bd6)
+    drop-shadow(0 6px 10px rgba(76, 60, 160, 0.35));
 }
 
 /* ---------- responsive ---------- */

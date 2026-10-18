@@ -12,6 +12,7 @@ Environment variables:
   COOKIE_SECURE  set to 1 when served over HTTPS     (default 0)
 """
 
+import gzip
 import hashlib
 import hmac
 import json
@@ -53,6 +54,9 @@ SESSION_TTL = timedelta(days=7)
 # Login throttling: at most LOGIN_MAX_FAILURES failed attempts per client IP per window.
 LOGIN_MAX_FAILURES = 10
 LOGIN_WINDOW_SECONDS = 15 * 60
+
+COMPRESSIBLE = ("text/", "application/javascript", "application/json", "image/svg+xml")
+_gzip_cache = {}  # (path, mtime) -> gzipped bytes; static files are few and small
 
 _db_lock = threading.Lock()
 _login_failures = {}
@@ -366,11 +370,22 @@ class Handler(BaseHTTPRequestHandler):
             target = STATIC_DIR / "index.html"
         ctype = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
         data = target.read_bytes()
+        gzipped = ctype.startswith(COMPRESSIBLE) and "gzip" in (self.headers.get("Accept-Encoding") or "")
+        if gzipped:
+            key = (target, target.stat().st_mtime_ns)
+            if key not in _gzip_cache:
+                _gzip_cache[key] = gzip.compress(data, compresslevel=9)
+            data = _gzip_cache[key]
         self.send_response(HTTPStatus.OK)
         self._security_headers()
         self.send_header("Content-Type", ctype)
+        if gzipped:
+            self.send_header("Content-Encoding", "gzip")
+        self.send_header("Vary", "Accept-Encoding")
         self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "no-cache")
+        # Vendored libraries are versioned and never edited, so let browsers keep them for a day.
+        vendored = STATIC_DIR / "vendor" in target.parents
+        self.send_header("Cache-Control", "public, max-age=86400" if vendored else "no-cache")
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(data)

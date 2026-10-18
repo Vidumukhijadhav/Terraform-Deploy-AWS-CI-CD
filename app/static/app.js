@@ -165,6 +165,8 @@
     const rect = fromEl.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
+    // scene3d.js (Three.js) sets window.taskflow3d when WebGL works; otherwise use emoji confetti.
+    if (window.taskflow3d) return window.taskflow3d.burst(x, y);
     for (let i = 0; i < 14; i++) {
       const bit = document.createElement("span");
       bit.className = "confetti";
@@ -243,6 +245,7 @@
     const pct = total ? Math.round((done / total) * 100) : 0;
     els.progressBar.style.strokeDashoffset = RING_LENGTH * (1 - pct / 100);
     els.progressText.textContent = `${pct}%`;
+    window.taskflow3d?.setProgress(pct);
 
     els.footerCount.textContent = active
       ? `${active} task${active === 1 ? "" : "s"} left 💪`
@@ -310,7 +313,12 @@
       if (updated.completed) {
         burstConfetti(checkmark);
         mascotReact(els.appMascot, "cheer");
-        toast(pick(CHEERS));
+        if (state.todos.every((t) => t.completed)) {
+          window.taskflow3d?.celebrate();
+          toast("Everything done! You're a legend 🏆🎉");
+        } else {
+          toast(pick(CHEERS));
+        }
       }
       render();
     } catch (err) {

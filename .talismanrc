@@ -1,4 +1,14 @@
 fileignoreconfig:
-- filename: .github/workflows/myapp.yml
-  checksum: 427d11bff1d70f65bc286b48e5d04c753b66d8d6244163e8db0c489b618dc6b3
+- filename: app/README.md
+  checksum: 10883b44594a87bb5a36a4719feac88136a57151223300eb2bc54527d4556b6e
+- filename: app/static/quotes.js
+  checksum: cd5eaffd5a70dab22bd58da2053b298142e1f70047cb5e1ead0c702f24e22667
+- filename: app/static/index.html
+  checksum: 984c81c4d869f5967db5b8beaef3a006ae15e07b269e2dd24ce8328006356561
+- filename: app/static/app.js
+  checksum: 42bfa97ac3ee2c750165e3dc2af66f301d52dfa329060327cc68987b7db3b28e
+- filename: app/static/style.css
+  checksum: b4f00e5d15bf450f92c366d72f846f8b9d4d6766d4cd1fbfa7dec12d1413640b
+- filename: app/server.py
+  checksum: b7d2da96d3d8c0915350e379c6b9a6d1680d13914b9be9d4c893f672a5d48f2f
 version: "1.0"
