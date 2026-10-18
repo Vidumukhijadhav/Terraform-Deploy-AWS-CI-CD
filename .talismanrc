@@ -1,4 +1,4 @@
 fileignoreconfig:
-- filename: env/dev/terraform.tfvars
-  checksum: cf70236f9f028be92ddf58d0e38d2d937cf78b367bbc105bc1e1716fbfce0530
+- filename: .github/workflows/myapp.yml
+  checksum: 427d11bff1d70f65bc286b48e5d04c753b66d8d6244163e8db0c489b618dc6b3
 version: "1.0"

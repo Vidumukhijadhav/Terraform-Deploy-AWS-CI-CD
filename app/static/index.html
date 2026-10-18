@@ -12,7 +12,50 @@
   <div class="bg-blob blob-2"></div>
   <div class="bg-blob blob-3"></div>
 
-  <main class="app">
+  <!-- Emojis drifting up the background -->
+  <div class="floaties" aria-hidden="true">
+    <span>🚀</span><span>⭐</span><span>🌈</span><span>💪</span><span>🎯</span>
+    <span>✨</span><span>🌻</span><span>🔥</span><span>💖</span><span>🏆</span>
+  </div>
+
+  <!-- ---------- login / signup ---------- -->
+  <section class="auth" id="auth" hidden>
+    <div class="auth-card card">
+      <div class="mascot-slot auth-mascot" data-mood="wave"></div>
+      <h1>Taskflow</h1>
+      <p class="subtitle" id="auth-subtitle">Welcome back! Log in to see your tasks 👋</p>
+
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="filter active" data-mode="login" role="tab">Log in</button>
+        <button type="button" class="filter" data-mode="signup" role="tab">Sign up</button>
+      </div>
+
+      <form id="auth-form" class="auth-form" novalidate>
+        <label class="field">
+          <span>Username</span>
+          <input id="auth-username" name="username" type="text" autocomplete="username"
+                 minlength="3" maxlength="32" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input id="auth-password" name="password" type="password" autocomplete="current-password"
+                 maxlength="128" required />
+        </label>
+        <label class="field" id="confirm-field" hidden>
+          <span>Confirm password</span>
+          <input id="auth-confirm" name="confirm" type="password" autocomplete="new-password" maxlength="128" />
+        </label>
+        <p class="hint" id="auth-hint" hidden>3–32 characters (letters, numbers, . _ -) and a password of at least 8 characters.</p>
+        <p class="auth-error" id="auth-error" role="alert"></p>
+        <button type="submit" class="btn-primary auth-submit" id="auth-submit">Log in 🚀</button>
+      </form>
+
+      <blockquote class="auth-quote" id="auth-quote"></blockquote>
+    </div>
+  </section>
+
+  <!-- ---------- todo app ---------- -->
+  <main class="app" id="app" hidden>
     <header class="header">
       <div>
         <p class="eyebrow" id="today"></p>
@@ -30,23 +73,35 @@
         <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
           <span class="sun">☀️</span><span class="moon">🌙</span>
         </button>
+        <button class="icon-btn" id="logout" aria-label="Log out" title="Log out">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
     </header>
 
+    <section class="quote-card card">
+      <div class="mascot-slot quote-mascot" id="app-mascot"></div>
+      <div class="bubble">
+        <p class="quote-text" id="quote-text"></p>
+        <p class="quote-author" id="quote-author"></p>
+      </div>
+      <button class="icon-btn" id="new-quote" aria-label="New quote" title="New quote">🔄</button>
+    </section>
+
     <section class="stats">
-      <div class="stat"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Total</span></div>
-      <div class="stat"><span class="stat-num" id="stat-active">0</span><span class="stat-label">Active</span></div>
-      <div class="stat"><span class="stat-num" id="stat-done">0</span><span class="stat-label">Done</span></div>
-      <div class="stat overdue"><span class="stat-num" id="stat-overdue">0</span><span class="stat-label">Overdue</span></div>
+      <div class="stat"><span class="stat-num" id="stat-total">0</span><span class="stat-label">📋 Total</span></div>
+      <div class="stat"><span class="stat-num" id="stat-active">0</span><span class="stat-label">⚡ Active</span></div>
+      <div class="stat"><span class="stat-num" id="stat-done">0</span><span class="stat-label">✅ Done</span></div>
+      <div class="stat overdue"><span class="stat-num" id="stat-overdue">0</span><span class="stat-label">⏰ Overdue</span></div>
     </section>
 
     <form class="composer card" id="todo-form" autocomplete="off">
-      <input id="todo-input" type="text" maxlength="200" placeholder="What needs to be done?" required />
+      <input id="todo-input" type="text" maxlength="200" placeholder="What needs to be done? ✍️" required />
       <div class="composer-row">
         <div class="priority-picker" role="radiogroup" aria-label="Priority">
-          <label><input type="radio" name="priority" value="low" /><span class="chip low">Low</span></label>
-          <label><input type="radio" name="priority" value="medium" checked /><span class="chip medium">Medium</span></label>
-          <label><input type="radio" name="priority" value="high" /><span class="chip high">High</span></label>
+          <label><input type="radio" name="priority" value="low" /><span class="chip low">🌱 Low</span></label>
+          <label><input type="radio" name="priority" value="medium" checked /><span class="chip medium">⚡ Medium</span></label>
+          <label><input type="radio" name="priority" value="high" /><span class="chip high">🔥 High</span></label>
         </div>
         <input id="todo-due" type="date" aria-label="Due date" />
         <button type="submit" class="btn-primary">
@@ -83,6 +138,38 @@
   </main>
 
   <div class="toast" id="toast" role="status"></div>
+  <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
+
+  <!-- Animated cartoon mascot ("Taski"), cloned into every .mascot-slot -->
+  <template id="mascot-template">
+    <svg class="mascot" viewBox="0 0 120 130" role="img" aria-label="Taski the mascot">
+      <ellipse class="m-shadow" cx="60" cy="122" rx="30" ry="5" />
+      <g class="m-figure">
+        <g class="m-antenna">
+          <path d="M60 26 Q58 14 64 8" fill="none" stroke-width="3" stroke-linecap="round" />
+          <path class="m-star" d="M64 0l2.4 5 5.4.6-4 3.7 1.1 5.3L64 12l-4.9 2.6 1.1-5.3-4-3.7 5.4-.6z" />
+        </g>
+        <path class="m-arm m-arm-left" d="M24 70 Q10 66 8 54" fill="none" stroke-width="7" stroke-linecap="round" />
+        <path class="m-arm m-arm-right" d="M96 70 Q110 66 112 54" fill="none" stroke-width="7" stroke-linecap="round" />
+        <rect class="m-leg" x="42" y="100" width="10" height="16" rx="5" />
+        <rect class="m-leg" x="68" y="100" width="10" height="16" rx="5" />
+        <rect class="m-body" x="20" y="24" width="80" height="84" rx="38" />
+        <ellipse class="m-belly" cx="60" cy="84" rx="24" ry="17" />
+        <path class="m-check" d="M50 84l7 7 13-14" fill="none" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+        <g class="m-eyes">
+          <ellipse class="m-eye" cx="45" cy="56" rx="8" ry="9.5" />
+          <ellipse class="m-eye" cx="75" cy="56" rx="8" ry="9.5" />
+          <circle class="m-pupil" cx="47" cy="58" r="4" />
+          <circle class="m-pupil" cx="77" cy="58" r="4" />
+          <circle class="m-glint" cx="49" cy="55" r="1.6" />
+          <circle class="m-glint" cx="79" cy="55" r="1.6" />
+        </g>
+        <ellipse class="m-cheek" cx="34" cy="70" rx="5.5" ry="3.5" />
+        <ellipse class="m-cheek" cx="86" cy="70" rx="5.5" ry="3.5" />
+        <path class="m-mouth" d="M52 68 Q60 76 68 68" fill="none" stroke-width="3" stroke-linecap="round" />
+      </g>
+    </svg>
+  </template>
 
   <template id="todo-template">
     <li class="todo">
@@ -105,6 +192,7 @@
     </li>
   </template>
 
+  <script src="/quotes.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
