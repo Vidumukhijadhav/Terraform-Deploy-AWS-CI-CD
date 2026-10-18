@@ -13,7 +13,7 @@ ami_id = "ami-02167eae61967e403"
 instance_type = "t3.micro"
 
 
-key_name = "testme"
+key_name = "promethious"
 
 root_volume_size = 20
 
