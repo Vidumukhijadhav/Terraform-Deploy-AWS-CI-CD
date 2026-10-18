@@ -2,6 +2,9 @@ name: My Python application deployment
 
 on:
   push:
+    paths:
+      - 'app/**'
+      - '.github/workflows/myapp.yml'
     branches:
       - main
   workflow_dispatch:

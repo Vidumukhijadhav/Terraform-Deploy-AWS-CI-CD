@@ -2,6 +2,9 @@ name: Terraform-AWS-Deploy
 
 on:
   push:
+    paths:
+      - 'env/dev/**'
+      - '.github/workflows/terraform-aws-deploy.yaml'
     branches:
       - main
   workflow_dispatch:
